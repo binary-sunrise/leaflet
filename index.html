@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basicmap</title>
+
+    <!-- leaflet css -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+<style>
+    body{
+        margin:0;
+        padding:0;
+    }
+    #map{
+        width :100%;
+        height:100vh;
+    }
+    .coordinates{
+        position : absolute;
+        bottom : 10px;
+        right : 50% ;
+    }
+    .leaflet-popup-content-wrapper{
+        background-color: black;
+        color :bisque
+    }
+    .leaflet-popup-content{
+        line-height: .5;
+    }
+    .leaflet-popup-tip{
+        background-color: black;
+    }
+</style>
+</head>
+<body>
+    <div id="map">
+        <div class="leaflet-control coordinates"></div>
+    </div>
+    </div>
+    <!-- leaflet js -->
+
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+    <script src = "/Data/points.js"></script>
+    <script src = "/Data/polyline.js"></script>
+    <script src = "/Data/Polygon.js"></script>
+
+    <script>
+
+        //  map initialisation
+        var map = L.map('map').setView([8.767433639414772, 76.82889433454639], 13);
+
+        // osm layer
+        var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        });
+
+        osm.addTo(map)
+
+        // water color
+
+        var Watercolor = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}', {
+            attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            subdomains: 'abcd',
+            minZoom: 1,
+            maxZoom: 16,
+            ext: 'jpg'
+        });
+
+        // Watercolor.addTo(map)
+
+        // Esri satellite
+
+        var Esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        });
+        // Esri.addTo(map)
+
+        // Google Hybrid
+
+        var googleHybrid = L.tileLayer('http://{s}.google.com/vt?lyrs=s,h&x={x}&y={y}&z={z}',{
+            maxZoom: 20,
+            subdomains:['mt0','mt1','mt2','mt3']
+        });
+        // googleHybrid.addTo(map)
+
+
+        // Marker
+
+        var myIcon = L.icon({
+            iconUrl: "/marker/mapmarker.png",
+            iconSize: [40,40],
+            iconAnchor: [22, 94],
+            popupAnchor: [-3, -76],
+            shadowSize: [68, 95],
+            shadowAnchor: [22, 94]
+        });
+        var Singlemarker = L.marker([8.767433639414772, 76.82889433454639] ,{icon :myIcon ,draggable :true});
+        var popup = Singlemarker.bindPopup("This is Vellalloor" + Singlemarker.getLatLng()).openPopup();
+        popup.addTo(map)
+
+        var Secondmarker = L.marker([7.787433639414772, 75.75889433454639] ,{icon :myIcon ,draggable :true});
+
+        // geoJSON on consolelog
+
+        console.log(Singlemarker.toGeoJSON())
+
+
+        // Geojson
+
+        var pointdata = L.geoJSON(PointJSON).addTo(map)
+        var polygondata = L.geoJSON(PolygonJSON,{
+            onEachFeature : function(feature,layer){
+                layer.bindPopup('<b>Name : </b>' + feature.properties.name)
+                },
+            style :{
+                fillColor :'red',
+                fillOpacity : 0.5,
+                color : '#c0c0c0'
+            }
+        }).addTo(map)
+        var linedata = L.geoJSON(PolylineJSON,{
+            onEachFeature : function(feature,layer){
+                layer.bindPopup('<b>Name :</b>' + feature.properties.name)
+                }
+        }).addTo(map)
+
+
+        // Layer controller
+
+        var baseMaps = {
+            "osm": osm,
+            "Watercolor": Watercolor,
+            "Esri" :Esri ,
+            "googleHybrid": googleHybrid 
+        };
+
+        var overlayMaps = {
+            "First Marker": Singlemarker,
+            "Second marker" : Secondmarker,
+            "point" : pointdata,
+            "line": linedata,
+            "polygon": polygondata
+        };
+
+        var layerControl = L.control.layers(baseMaps, overlayMaps,{collapsed :false}).addTo(map);
+
+
+        // events
+
+        map.on('mouseover',function(){
+            console.log("your mouse is over the map")
+        })
+        map.on('mousemove',function(e){
+            document.getElementsByClassName('coordinates')[0].innerHTML = 'LAT :' + e.latlng.lat + 'LONG :' + e.latlng.lng ;
+            console.log('latitude :' + e.latlng.lat, 'longitude :' + e.latlng.lng)
+        })
+
+
+        // style customisation
+
+
+
+        
+
+    </script>
+</body>
+</html>
